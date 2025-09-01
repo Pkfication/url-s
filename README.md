@@ -64,20 +64,45 @@ url-shortner/
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd url-shortner
+
+# Start the entire stack with Docker Compose
+make dev
+
+# Or start in background
+make dev-detach
+
+# Check status
+make status
+
+# View logs
+make dev-logs
+
+# Stop services
+make dev-stop
+```
+
+### Option 2: Local Development
+
+#### 1. Clone the Repository
 
 ```bash
 git clone <your-repo-url>
 cd url-shortner
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
 ```bash
 go mod tidy
 ```
 
-### 3. Start Redis
+#### 3. Start Redis
 
 ```bash
 # macOS (using Homebrew)
@@ -90,7 +115,7 @@ sudo systemctl start redis
 redis-server
 ```
 
-### 4. Run the Application
+#### 4. Run the Application
 
 ```bash
 go run main.go
@@ -217,23 +242,58 @@ const CacheDuration = 6 * time.Hour
 2. Update handlers to use new service methods
 3. Maintain separation of concerns
 
+## 🐳 Docker Support
+
+### Quick Start with Docker
+
+```bash
+# Start development environment
+make dev
+
+# Start production environment
+make prod
+
+# View available commands
+make help
+```
+
+### Docker Compose Files
+
+- **`docker-compose.yml`** - Development environment with Redis
+- **`docker-compose.prod.yml`** - Production environment with security and scaling
+
+### Docker Commands
+
+```bash
+# Development
+make dev              # Start dev environment
+make dev-detach       # Start in background
+make dev-logs         # View logs
+make dev-stop         # Stop services
+
+# Production
+make prod             # Start production
+make prod-logs        # View production logs
+make prod-stop        # Stop production
+
+# Utilities
+make build            # Build Docker image
+make clean            # Clean up resources
+make status           # Check service status
+make health           # Health check
+```
+
 ## 🚀 Deployment
 
 ### Docker (Recommended)
 
-```dockerfile
-FROM golang:1.24-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN go build -o main .
+The project includes optimized Docker configurations:
 
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
-COPY --from=builder /app/main .
-EXPOSE 9808
-CMD ["./main"]
-```
+- **Multi-stage builds** for smaller images
+- **Security best practices** (non-root user, minimal base images)
+- **Health checks** for monitoring
+- **Resource limits** for production
+- **Persistent Redis storage**
 
 ### Environment Variables
 
@@ -242,6 +302,7 @@ export REDIS_ADDR=localhost:6379
 export REDIS_PASSWORD=
 export REDIS_DB=0
 export SERVER_PORT=9808
+export GIN_MODE=release  # For production
 ```
 
 ## 🤝 Contributing

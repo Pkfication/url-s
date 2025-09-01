@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -28,8 +29,14 @@ const CacheDuration = 6 * time.Hour
 
 // Initializing the store service and return a store pointer 
 func InitializeStore() *StorageService {
+	// Get Redis address from environment variable or use default
+	redisAddr := "localhost:6379"
+	if addr := os.Getenv("REDIS_ADDR"); addr != "" {
+		redisAddr = addr
+	}
+	
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     redisAddr,
 		Password: "",
 		DB:       0,
 	})
