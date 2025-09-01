@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"url/handler"
+	"url/routes"
 	"url/service"
 
 	"github.com/gin-gonic/gin"
@@ -13,27 +13,18 @@ func main() {
 	storageService := service.InitializeStore()
 	urlService := service.NewURLService(storageService)
 
-	// Setup middleware for dependency injection
+	// Setup Gin engine
 	r := gin.Default()
-	r.Use(func(c *gin.Context) {
-		c.Set("urlService", urlService)
-		c.Next()
-	})
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Welcome to the URL Shortener API",
-		})
-	})
+	// Create services struct for route registration
+	services := &routes.Services{
+		URLService: urlService,
+	}
 
-	r.POST("/create-short-url", func(c *gin.Context) {
-		handler.CreateShortUrl(c)
-	})
+	// Register all routes with middleware
+	routes.RegisterRoutes(r, services)
 
-	r.GET("/:shortUrl", func(c *gin.Context) {
-		handler.HandleShortUrlRedirect(c)
-	})
-
+	// Start the server
 	err := r.Run(":9808")
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start the web server - Error: %v", err))

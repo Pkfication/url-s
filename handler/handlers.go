@@ -50,3 +50,37 @@ func HandleShortUrlRedirect(c *gin.Context) {
 	}
 	c.Redirect(302, initialUrl)
 }
+
+// Welcome handles the root endpoint
+func Welcome(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Welcome to the URL Shortener API",
+	})
+}
+
+// HealthCheck handles health check requests
+func HealthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"status": "healthy",
+		"service": "url-shortener",
+	})
+}
+
+// GetShortUrl retrieves a specific short URL by ID
+func GetShortUrl(c *gin.Context) {
+	shortUrlID := c.Param("id")
+	
+	// Get URL service from context (injected by middleware)
+	urlService := c.MustGet("urlService").(*service.URLService)
+	
+	initialUrl, err := urlService.GetOriginalURL(shortUrlID)
+	if err != nil || initialUrl == "" {
+		c.JSON(http.StatusNotFound, gin.H{"error": "URL not found"})
+		return
+	}
+	
+	c.JSON(200, gin.H{
+		"short_url": shortUrlID,
+		"long_url": initialUrl,
+	})
+}
